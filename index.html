@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>クイズゲーム</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; background: #f0f0f0; }
+    #quiz { max-width: 600px; margin: 0 auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    button { padding: 10px 20px; margin: 10px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    #leaderboard { margin-top: 20px; }
+  </style>
+</head>
+<body>
+  <div id="quiz">
+    <h1>リアルタイムクイズゲーム</h1>
+    <p>問題: 2 + 2 = ?</p>
+    <input type="text" id="playerName" placeholder="プレイヤー名">
+    <input type="text" id="answer" placeholder="回答を入力">
+    <button onclick="submitAnswer()">回答を送信</button>
+    <div id="result"></div>
+    <h2>リーダーボード</h2>
+    <div id="leaderboard"></div>
+  </div>
+
+  <script>
+    async function submitAnswer() {
+      const playerName = document.getElementById('playerName').value || '匿名';
+      const answer = document.getElementById('answer').value;
+      const resultDiv = document.getElementById('result');
+      const leaderboardDiv = document.getElementById('leaderboard');
+
+      if (!playerName || !answer) {
+        resultDiv.textContent = 'プレイヤー名と回答を入力してください。';
+        return;
+      }
+
+      try {
+        // 回答送信
+        const response = await fetch('https://quiz-game.your-subdomain.workers.dev/', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ playerName, answer })
+        });
+        const data = await response.json();
+        resultDiv.textContent = data.message || data.error;
+
+        // リーダーボード更新
+        const leaderboardResponse = await fetch('https://quiz-game.your-subdomain.workers.dev/leaderboard', {
+          method: 'GET',
+          headers: { 'Content-Type': 'application/json' }
+        });
+        const leaderboardData = await leaderboardResponse.json();
+        leaderboardDiv.innerHTML = '<h3>現在のランキング</h3>' +
+          (leaderboardData.scores || []).map(score =>
+            `<p>${score.playerName}: ${score.score} ポイント</p>`
+          ).join('');
+      } catch (e) {
+        resultDiv.textContent = 'エラーが発生しました: ' + e.message;
+      }
+    }
+  </script>
+</body>
+</html>
