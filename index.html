@@ -47,7 +47,7 @@
         resultDiv.textContent = data.message || data.error;
 
         // リーダーボード更新
-        const leaderboardResponse = await fetch('https://quiz-game.your-subdomain.workers.dev/leaderboard', {
+        const leaderboardResponse = await fetch('https://gunsonline.maikanamaikana.workers.dev/leaderboard', {
           method: 'GET',
           headers: { 'Content-Type': 'application/json' }
         });
